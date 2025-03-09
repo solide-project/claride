@@ -3,12 +3,12 @@
 import * as React from "react"
 import { AlertCircle, AlertTriangle } from "lucide-react"
 
-import { useClarinet } from "@/components/clarinet/clarinet-provider"
+import { useClarity } from "@/components/clarity/clarity-provider"
 
 interface CompileErrorsProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function CompileErrors({ }: CompileErrorsProps) {
-    const { errors } = useClarinet()
+    const { errors } = useClarity()
     const loadIcon = (severity: string) => {
         switch (severity.toLocaleLowerCase()) {
             case "error":

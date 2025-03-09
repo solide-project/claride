@@ -8,16 +8,16 @@ import path from "path"
  * @param url
  * @returns
  */
-export const getClarinetContract = async (url: string) => {
+export const getClarityContract = async (url: string) => {
     try {
-        const loader = new ClarinetLoader(url)
+        const loader = new ClarityLoader(url)
         return await loader.generateSource()
     } catch (e: any) {
         return e.message.toString()
     }
 }
 
-class ClarinetLoader {
+class ClarityLoader {
     source: string
     constructor(source: string) {
         this.source = source

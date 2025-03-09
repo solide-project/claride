@@ -10,14 +10,14 @@ import { parseContractId } from "@stacks/transactions";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react"
-import { useClarinet } from "../clarinet-provider";
+import { useClarity } from "../clarity-provider";
 
 interface ContractHistoryProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function ContractHistory({ className }: ContractHistoryProps) {
     const { push } = useRouter()
     const logger = useLogger()
-    const { selectedNetwork } = useClarinet()
+    const { selectedNetwork } = useClarity()
 
     const [userAddress, setUserAddress] = useState("")
     const [userContracts, setUserContracts] = useState<{ [user: string]: object[] }>({})

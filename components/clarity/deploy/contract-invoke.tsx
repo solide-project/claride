@@ -21,7 +21,7 @@ import { isConnected } from "@stacks/connect";
 import { AbiParameter } from "@/lib/stacks/abi";
 import { ClarityAbiFunction, hexToCV, ReadOnlyFunctionResponse, ReadOnlyFunctionSuccessResponse } from "@stacks/transactions";
 import * as toml from '@ltd/j-toml'
-import { CompiledContract, useClarinet } from "../clarinet-provider";
+import { CompiledContract, useClarity } from "../clarity-provider";
 import { SelectContract } from "./select-contract";
 import { Configuration, TransactionsApi, TransactionsApiInterface } from "@stacks/blockchain-api-client";
 
@@ -31,7 +31,7 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
     const web3Hook = useWeb3Hook();
     const logger = useLogger();
     const vfs = useFileSystem();
-    const clarinet = useClarinet()
+    const clarity = useClarity()
 
     const [msgValue, setMsgValue] = useState<number>(0)
     const [contractAddress, setContractAddress] = useState<string>("")
@@ -59,7 +59,7 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
             throw new Error("Not authenticated")
         }
 
-        if (!clarinet.selectedContract && !contractAddress) {
+        if (!clarity.selectedContract && !contractAddress) {
             throw new Error("Please select contract to deploy")
         }
 
@@ -69,8 +69,8 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
         let contractName = ""
         let codeBody = ""
         if (!contractAddress) {
-            contractName = clarinet.selectedContract?.filePath || ""
-            codeBody = clarinet.selectedContract?.content || ""
+            contractName = clarity.selectedContract?.filePath || ""
+            codeBody = clarity.selectedContract?.content || ""
         }
 
         const result = await web3Hook.doDeploy({ contractAddress, contractName, codeBody })

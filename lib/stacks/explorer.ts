@@ -64,6 +64,7 @@ requirements = []
 path = '${contractPath}'
 clarity_version = 3
 epoch = 3.1
+
 [repl.analysis]
 passes = ['check_checker']
 

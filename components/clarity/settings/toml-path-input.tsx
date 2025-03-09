@@ -1,14 +1,14 @@
 import { Input } from "@/components/ui/input"
-import { useClarinet } from "@/components/clarinet/clarinet-provider";
+import { useClarity } from "@/components/clarity/clarity-provider";
 import { cn } from "@/lib/utils";
 
 interface TomlPathInputProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function TomlPathInput({ className }: TomlPathInputProps) {
-    const clarinet = useClarinet();
+    const clarity = useClarity();
 
     return <Input className={cn("w-[65%]", className)}
         placeholder="Entry Toml"
-        value={clarinet.tomlPath}
-        onChange={(e) => clarinet.setTomlPath(e.target.value)} />
+        value={clarity.tomlPath}
+        onChange={(e) => clarity.setTomlPath(e.target.value)} />
 }

@@ -1,6 +1,6 @@
-import { ClarideIDE } from "@/components/clarinet/ide";
-import { LoadContractPage } from "@/components/clarinet/load-contract";
-import { ClarinetProvider } from "@/components/clarinet/clarinet-provider";
+import { ClarideIDE } from "@/components/clarity/ide";
+import { LoadContractPage } from "@/components/clarity/load-contract";
+import { ClarityProvider } from "@/components/clarity/clarity-provider";
 import { EthGetSourceCodeInterface, getSourceCode } from "@/lib/stacks/explorer";
 
 export default async function Page({
@@ -16,7 +16,7 @@ export default async function Page({
   if (typeof data.result === "string")
     return <LoadContractPage message={`${data.result} ${JSON.stringify(data)}`} />
 
-  return <ClarinetProvider>
+  return <ClarityProvider>
     <ClarideIDE
       url={params.address}
       chainId={params.chain}
@@ -24,5 +24,5 @@ export default async function Page({
       content={data.result[0].SourceCode}
       version={data.result[0].CompilerVersion}
     />
-  </ClarinetProvider>
+  </ClarityProvider>
 }

@@ -18,7 +18,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useClarinet } from "../clarinet-provider"
+import { useClarity } from "../clarity-provider"
 
 
 interface SelectContractProps extends React.HTMLAttributes<HTMLDivElement> { }
@@ -26,7 +26,7 @@ interface SelectContractProps extends React.HTMLAttributes<HTMLDivElement> { }
 export function SelectContract({ className }: SelectContractProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState("")
-    const { selectedContract, setSelectedContract, compiledContracts } = useClarinet()
+    const { selectedContract, setSelectedContract, compiledContracts } = useClarity()
 
     return (
         <Popover open={open} onOpenChange={setOpen}>

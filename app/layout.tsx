@@ -8,10 +8,10 @@ import { SolideProviders } from "@/components/providers"
 
 export const metadata: Metadata = {
   title: {
-    default: "Claride | Clarinet IDE",
+    default: "Claride | Clarity IDE",
     template: `%s - Claride`,
   },
-  description: "Lightweight Clarinet IDE",
+  description: "Lightweight Clarity IDE",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",

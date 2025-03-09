@@ -9,7 +9,7 @@ export interface CompiledContract {
     content: string
 }
 
-export const ClarinetProvider = ({ children }: ClarinetProviderProps) => {
+export const ClarityProvider = ({ children }: ClarityProviderProps) => {
     const [tomlPath, setTomlPath] = useState<string>("")
     const [errors, setErrors] = useState<CompileError>({} as CompileError)
     const [selectedNetwork, setSelectedNetwork] = useState<StacksNetwork>(STACKS_MAINNET)
@@ -26,7 +26,7 @@ export const ClarinetProvider = ({ children }: ClarinetProviderProps) => {
     }
 
     return (
-        <ClarinetContext.Provider
+        <ClarityContext.Provider
             value={{
                 errors,
                 setErrors,
@@ -42,15 +42,15 @@ export const ClarinetProvider = ({ children }: ClarinetProviderProps) => {
             }}
         >
             {children}
-        </ClarinetContext.Provider>
+        </ClarityContext.Provider>
     )
 }
 
-interface ClarinetProviderProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ClarityProviderProps extends React.HTMLAttributes<HTMLDivElement> {
     name?: string
 }
 
-export const ClarinetContext = createContext({
+export const ClarityContext = createContext({
     errors: {} as CompileError,
     setErrors: (_: CompileError) => { },
     resetBuild: () => { },
@@ -64,4 +64,4 @@ export const ClarinetContext = createContext({
     setSelectedContract: (_: CompiledContract | undefined) => { },
 })
 
-export const useClarinet = () => useContext(ClarinetContext)
+export const useClarity = () => useContext(ClarityContext)

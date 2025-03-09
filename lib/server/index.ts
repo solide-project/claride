@@ -1,2 +1,2 @@
 export { loadSampleProject } from "./default"
-export { getClarinetContract } from "./clarinet-loader"
+export { getClarityContract } from "./clarity-loader"

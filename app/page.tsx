@@ -1,7 +1,7 @@
-import { ClarideIDE } from "@/components/clarinet/ide";
-import { LoadContractPage } from "@/components/clarinet/load-contract";
-import { ClarinetProvider } from "@/components/clarinet/clarinet-provider";
-import { loadSampleProject, getClarinetContract } from "@/lib/server";
+import { ClarideIDE } from "@/components/clarity/ide";
+import { LoadContractPage } from "@/components/clarity/load-contract";
+import { ClarityProvider } from "@/components/clarity/clarity-provider";
+import { loadSampleProject, getClarityContract } from "@/lib/server";
 
 interface SearchParams {
   params: { slug: string }
@@ -13,14 +13,14 @@ export default async function IndexPage({ searchParams }: SearchParams) {
 
   let data = loadSampleProject()
   if (url) {
-    data = await getClarinetContract(url)
+    data = await getClarityContract(url)
   }
 
   if (typeof data === "string") return <LoadContractPage message={data} />
 
-  return <ClarinetProvider>
+  return <ClarityProvider>
     <ClarideIDE
       content={JSON.stringify(data)}
     />
-  </ClarinetProvider>
+  </ClarityProvider>
 }

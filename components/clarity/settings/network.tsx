@@ -15,14 +15,14 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useClarinet } from "../clarinet-provider"
+import { useClarity } from "../clarity-provider"
 import { ChainID, getNetworkNameFromChainID } from "@/lib/chains"
 import { STACKS_MAINNET, STACKS_TESTNET } from "@stacks/network"
 
 interface NetworkButtonProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function NetworkButton({ className }: NetworkButtonProps) {
-    const { selectedNetwork, setSelectedNetwork } = useClarinet()
+    const { selectedNetwork, setSelectedNetwork } = useClarity()
 
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState<string>(selectedNetwork.chainId.toString())

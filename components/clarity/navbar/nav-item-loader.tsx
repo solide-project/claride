@@ -87,7 +87,7 @@ export function NavItemLoader({
           <div className="flex items-center justify-center">
             <div className="flex w-4/5 items-center">
               <Input
-                placeholder="Load Clarinet Address or Clarinet File on Github"
+                placeholder="Load Clarity smart contract or Clarinet File on Github"
                 onChange={(e) => setSearchResult(e.target.value)}
               />
             </div>

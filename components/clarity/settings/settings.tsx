@@ -1,11 +1,11 @@
 import { IDESettings } from "@/components/core/components/ide-settings"
 import { Title } from "@/components/core/components/title"
-import { TomlPathInput } from "@/components/clarinet/settings/toml-path-input"
+import { TomlPathInput } from "@/components/clarity/settings/toml-path-input"
 import { NetworkButton } from "./network"
 
-interface ClarinetSettingsProps extends React.HTMLAttributes<HTMLDivElement> { }
+interface ClaritySettingsProps extends React.HTMLAttributes<HTMLDivElement> { }
 
-export function ClarinetSettings({ className }: ClarinetSettingsProps) {
+export function ClaritySettings({ className }: ClaritySettingsProps) {
     return <IDESettings>
         <div className="flex items-center justify-between">
             <div className="py-2 font-semibold text-grayscale-350">Clarinet Toml Path</div>

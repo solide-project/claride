@@ -12,18 +12,18 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { ClarinetSettings } from "@/components/clarinet/settings/settings"
-import { ClarinetSelectedChain } from "../selected-chain"
+import { ClaritySettings } from "@/components/clarity/settings/settings"
+import { ClaritySelectedChain } from "../selected-chain"
 import { NavItemLoader } from "./nav-item-loader"
 import { NavItemUserContracts } from "./nav-item-user-contracts"
 
-interface ClarinetNavBarProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ClarityNavBarProps extends React.HTMLAttributes<HTMLDivElement> {
     url: string,
 }
 
-export function ClarinetNavBar({
+export function ClarityNavBar({
     url,
-}: ClarinetNavBarProps) {
+}: ClarityNavBarProps) {
     return (
         <div className="flex h-full flex-col gap-y-2 rounded-lg bg-grayscale-025 px-2 py-4">
             <NavTooltipItem tooltip="File Explorer">
@@ -46,9 +46,9 @@ export function ClarinetNavBar({
             </NavTooltipItem>
 
             <div className="mt-auto flex flex-col items-center gap-2">
-                <ClarinetSelectedChain />
+                <ClaritySelectedChain />
                 <NavItemTheme />
-                <ClarinetSettings />
+                <ClaritySettings />
             </div>
         </div>
     )

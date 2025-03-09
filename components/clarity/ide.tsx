@@ -22,9 +22,9 @@ import {
     FILE_KEY,
     useNav,
 } from "@/components/core/providers/navbar-provider"
-import { BuildDeploy } from "@/components/clarinet/deploy/build-deploy"
-import { CompiledContract, useClarinet } from "@/components/clarinet/clarinet-provider"
-import { ClarinetNavBar } from "@/components/clarinet/navbar/navbar"
+import { BuildDeploy } from "@/components/clarity/deploy/build-deploy"
+import { CompiledContract, useClarity } from "@/components/clarity/clarity-provider"
+import { ClarityNavBar } from "@/components/clarity/navbar/navbar"
 import { QueryHelper } from "@/lib/core"
 import { CompileInput, parseInput } from "@/lib/stacks/input"
 import { CompileError } from "@/lib/stacks/error"
@@ -59,7 +59,7 @@ export function ClarideIDE({
     const fs = useFileSystem()
     const ide = useEditor()
     const logger = useLogger()
-    const clarinet = useClarinet()
+    const clarity = useClarity()
 
     const { setNavItemActive, isNavItemActive } = useNav()
 
@@ -76,7 +76,7 @@ export function ClarideIDE({
                 .filter(i => i.toLocaleLowerCase().includes("clarinet.toml"))
                 .pop()
             if (entry) {
-                clarinet.setTomlPath(entry)
+                clarity.setTomlPath(entry)
             }
 
             const entryFile = await fs.initAndFoundEntry(input.sources, title || "Clarinet.toml")
@@ -109,11 +109,11 @@ export function ClarideIDE({
     }
 
     const doCompile = async () => {
-        clarinet.resetBuild()
+        clarity.resetBuild()
         let queryBuilder = new QueryHelper()
 
-        if (clarinet.tomlPath) {
-            queryBuilder = queryBuilder.addParam("toml", clarinet.tomlPath)
+        if (clarity.tomlPath) {
+            queryBuilder = queryBuilder.addParam("toml", clarity.tomlPath)
         }
 
         const sources = fs.generateSources()
@@ -127,7 +127,7 @@ export function ClarideIDE({
 
         if (!response.ok) {
             const data = (await response.json()) as CompileError
-            clarinet.setErrors(data)
+            clarity.setErrors(data)
 
             logger.error(`Compiled with ${data.details.length} errors.`, true)
             return
@@ -148,7 +148,7 @@ export function ClarideIDE({
         </>)
 
         // Create list of compiled contract
-        const file = fs.vfs.cat(clarinet.tomlPath || "Clarinet.toml")
+        const file = fs.vfs.cat(clarity.tomlPath || "Clarinet.toml")
         const tomlContent = toml.parse(file.content)
 
         const contracts: CompiledContract[] = []
@@ -159,12 +159,12 @@ export function ClarideIDE({
                 content: contract.content,
             })
         })
-        clarinet.setCompiledContracts(contracts)
+        clarity.setCompiledContracts(contracts)
     }
 
     return <div className="min-w-screen max-w-screen flex max-h-screen min-h-screen">
         <div className="py-2 pl-2">
-            <ClarinetNavBar url={""} />
+            <ClarityNavBar url={""} />
         </div>
         <ResizablePanelGroup
             direction="horizontal"

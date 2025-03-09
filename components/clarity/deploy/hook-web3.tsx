@@ -5,11 +5,11 @@ import { FinishedTxData, request } from "@stacks/connect"
 import { STACKS_TESTNET } from '@stacks/network';
 import { StacksSmartContract } from "@/lib/stacks/contract"
 import { ChainID } from "@/lib/chains"
-import { useClarinet } from "../clarinet-provider";
+import { useClarity } from "../clarity-provider";
 
 export const useWeb3Hook = () => {
     const [contracts, setContracts] = useState<DeployedContracts>({})
-    const { selectedNetwork } = useClarinet()
+    const { selectedNetwork } = useClarity()
 
     const executeSend = async (
         contractAddress: string,

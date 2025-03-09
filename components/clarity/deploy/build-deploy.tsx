@@ -5,10 +5,10 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 import { Title } from "@/components/core/components/title"
-import { useClarinet } from "@/components/clarinet/clarinet-provider"
-import { ContractInvoke } from "@/components/clarinet/deploy/contract-invoke"
-import { CompileErrors } from "@/components/clarinet/deploy/compile-errors"
-import { ContractOverview } from "@/components/clarinet/deploy/contract-overview"
+import { useClarity } from "@/components/clarity/clarity-provider"
+import { ContractInvoke } from "@/components/clarity/deploy/contract-invoke"
+import { CompileErrors } from "@/components/clarity/deploy/compile-errors"
+import { ContractOverview } from "@/components/clarity/deploy/contract-overview"
 
 interface BuildDeployProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -18,7 +18,7 @@ enum Tab {
 }
 
 export function BuildDeploy({ className }: BuildDeployProps) {
-    const clarinet = useClarinet()
+    const clarity = useClarity()
 
     const [activeTab, setActiveTab] = useState<Tab>(Tab.INTERACT)
     const isActive = (tab: string) => activeTab === tab
@@ -33,7 +33,7 @@ export function BuildDeploy({ className }: BuildDeployProps) {
         <div className={cn("px-2 pb-4", className)}>
             <Title text="Build & Deploy" />
 
-            {clarinet.errors && clarinet.errors.details && <CompileErrors />}
+            {clarity.errors && clarity.errors.details && <CompileErrors />}
 
             <div className="mx-2 my-4 flex items-center gap-x-4 text-sm">
                 <div
