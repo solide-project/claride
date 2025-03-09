@@ -6,6 +6,9 @@ import { VFSFile } from "@/lib/core"
 import { useEditor } from "@/components/core/providers/editor-provider"
 import { useFileSystem } from "@/components/core/providers/file-provider"
 import path from "path"
+import { configLanguage } from "@/lib/monaco/clarity/language"
+import { autocomplete, hover } from "@/lib/monaco/clarity/autocomplete"
+import { defineTheme } from "@/lib/monaco/clarity/theme"
 
 interface IDEProps extends React.HTMLAttributes<HTMLDivElement> {
   defaultLanguage?: string
@@ -69,6 +72,10 @@ export function IDE({ defaultLanguage = "clarity" }: IDEProps) {
   const monaco = useMonaco()
   useEffect(() => {
     if (monaco) {
+      configLanguage(monaco)
+      hover(monaco)
+      autocomplete(monaco)
+      defineTheme(monaco)
     }
   }, [monaco])
 
@@ -99,6 +106,10 @@ export function IDE({ defaultLanguage = "clarity" }: IDEProps) {
         editor.onDidChangeCursorSelection((event: any) =>
           handleSelectionChange(event, editor)
         )
+
+        editor.updateOptions({
+          wordSeparators: '`~!@#$%^&*()=+[{]}\\|;:\'",.<>/?',
+        });
 
         editor.addAction({
           id: "copilot",

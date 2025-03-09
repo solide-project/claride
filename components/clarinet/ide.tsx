@@ -23,12 +23,15 @@ import {
     useNav,
 } from "@/components/core/providers/navbar-provider"
 import { BuildDeploy } from "@/components/clarinet/deploy/build-deploy"
-import { useClarinet } from "@/components/clarinet/clarinet-provider"
+import { CompiledContract, useClarinet } from "@/components/clarinet/clarinet-provider"
 import { ClarinetNavBar } from "@/components/clarinet/navbar/navbar"
 import { QueryHelper } from "@/lib/core"
 import { CompileInput, parseInput } from "@/lib/stacks/input"
 import { CompileError } from "@/lib/stacks/error"
 import { FileTree } from "@/components/core/file/file-tree"
+import * as toml from '@ltd/j-toml'
+import { CONTRACT_KEY } from "./navbar/nav-item-user-contracts"
+import { ContractHistory } from "./contract/contract-history"
 
 export const hexToDecimal = (hex: string): number => parseInt(hex, 16)
 
@@ -66,6 +69,8 @@ export function ClarideIDE({
             setNavItemActive(FILE_KEY, true)
             setNavItemActive(CONSOLE_KEY, true)
 
+            fs.vfs.clear()
+            
             let input: CompileInput = parseInput(content)
             const entry = Object.keys(input.settings?.compilationTarget || [])
                 .filter(i => i.toLocaleLowerCase().includes("clarinet.toml"))
@@ -127,6 +132,34 @@ export function ClarideIDE({
             logger.error(`Compiled with ${data.details.length} errors.`, true)
             return
         }
+
+        // Compile Success
+        const data = await response.json()
+        const logs: string[] = data.details
+        console.log(logs.join("\n"))
+        logger.info(<>
+            {logs.map((log, index) => {
+                return (
+                    <div key={index}>
+                        {log} <br />
+                    </div>
+                )
+            })}
+        </>)
+
+        // Create list of compiled contract
+        const file = fs.vfs.cat(clarinet.tomlPath || "Clarinet.toml")
+        const tomlContent = toml.parse(file.content)
+
+        const contracts: CompiledContract[] = []
+        Object.entries(tomlContent["contracts"] as any).forEach(([item, val]: any) => {
+            const contract = fs.vfs.cat(val.path)
+            contracts.push({
+                filePath: item,
+                content: contract.content,
+            })
+        })
+        clarinet.setCompiledContracts(contracts)
     }
 
     return <div className="min-w-screen max-w-screen flex max-h-screen min-h-screen">
@@ -151,9 +184,9 @@ export function ClarideIDE({
                     {isNavItemActive(CODE_KEY) && (
                         <BuildDeploy className="rounded-lg bg-grayscale-025" />
                     )}
-                    {/* {isNavItemActive(UTILITY_KEY) && (
-                            <UtiltyTab className="rounded-lg bg-grayscale-025" />
-                        )} */}
+                    {isNavItemActive(CONTRACT_KEY) && (
+                        <ContractHistory className="rounded-lg bg-grayscale-025" />
+                    )}
                 </div>
             </ResizablePanel>
             {(isNavItemActive(FILE_KEY) || isNavItemActive(CODE_KEY)) && (

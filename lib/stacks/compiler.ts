@@ -23,11 +23,10 @@ export const compile = async (sourcePath: string, toml: string = "", packageName
         }
     ).split("\n");
 
-    const data: any = {}
-    console.log(getItemsBeforeSeparator(compiledModules))
+    const data = getItemsBeforeSeparator(compiledModules)
 
     // console.log(data)
-    return data
+    return data.filter(x => x !== "")
 }
 
 function getItemsBeforeSeparator(arr: string[]): string[] {

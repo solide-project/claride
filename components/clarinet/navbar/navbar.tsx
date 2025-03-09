@@ -1,7 +1,6 @@
 "use client"
 
 import { NavItemCode } from "@/components/core/navbar/nav-item-code"
-import { NavItemContent } from "@/components/core/navbar/nav-item-content"
 import { NavItemEditor } from "@/components/core/navbar/nav-item-editor"
 import { NavItemFile } from "@/components/core/navbar/nav-item-file"
 import { NavItemTheme } from "@/components/core/navbar/nav-item-theme"
@@ -14,10 +13,9 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { ClarinetSettings } from "@/components/clarinet/settings/settings"
-import { NavItemDownloader } from "@/components/clarinet/navbar/nav-item-downloader"
-import { SelectedNetwork } from "@/components/clarinet/navbar/selected-network"
 import { ClarinetSelectedChain } from "../selected-chain"
 import { NavItemLoader } from "./nav-item-loader"
+import { NavItemUserContracts } from "./nav-item-user-contracts"
 
 interface ClarinetNavBarProps extends React.HTMLAttributes<HTMLDivElement> {
     url: string,
@@ -40,11 +38,11 @@ export function ClarinetNavBar({
             <NavTooltipItem tooltip="Console">
                 <NavItemConsole />
             </NavTooltipItem>
-            <NavTooltipItem tooltip="Download Smart Contract">
-                <NavItemDownloader />
-            </NavTooltipItem>
             <NavTooltipItem tooltip="Load New Contract">
                 <NavItemLoader />
+            </NavTooltipItem>
+            <NavTooltipItem tooltip="User Contracts">
+                <NavItemUserContracts />
             </NavTooltipItem>
 
             <div className="mt-auto flex flex-col items-center gap-2">

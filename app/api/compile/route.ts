@@ -72,26 +72,19 @@ export async function POST(request: NextRequest) {
         console.log("Compiling", data.project.name, sourcePath, contractPath)
         const output = await compile(sourcePath, tomlPath, data.project.name, contractPath);
 
-        // fs.rmSync(mainDir, { recursive: true });
+        fs.rmSync(mainDir, { recursive: true });
 
-        const zip = new JSZip();
-        // zip.file("results.json", JSON.stringify(output));
-        // zip.file(`contract.wasm`, new Uint8Array(wasm));
-
-        // Generate the zip file as a Blob (Node.js environment uses Buffers)
-        const content: Blob = await zip.generateAsync({ type: 'blob' })
-        return new NextResponse(content, {
-            headers: {
-                "Content-Type": "application/blob",
-                "Content-Disposition": `attachment; filename=${data.project.name}.zip`
-            }
-        });
+        return NextResponse.json(
+            {
+                details: output,
+            },
+        )
 
     } catch (error: any) {
         console.log('error', error)
         let errorMessage: string = stripAnsi(error.stderr || error.stdout || error.message || "Internal error while compiling.");
 
-        // fs.rmSync(mainDir, { recursive: true });
+        fs.rmSync(mainDir, { recursive: true });
 
         return NextResponseError(errorMessage);
     }

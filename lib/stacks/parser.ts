@@ -21,12 +21,17 @@ export const toNative = (value: any = "", input: AbiParameter) => {
             case 'int128':
                 data = Cl.int(value)
                 break
+            case 'uint128':
+                data = Cl.uint(value)
+                break
+            case 'none':
+                data = Cl.none()
+                break
             case 'bool':
                 data = Cl.bool(value.toString() === 'true')
                 break
         }
     }
 
-    console.log(value, input, data)
     return data
 }

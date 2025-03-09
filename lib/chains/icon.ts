@@ -8,6 +8,6 @@ const getIcon = (chainId: string): string => {
         case ChainID.STACKS_TESTNET:
         case ChainID.STACKS:
         default:
-            return "eth.svg"
+            return "stx.svg"
     }
 }

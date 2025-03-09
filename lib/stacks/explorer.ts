@@ -1,8 +1,5 @@
 import { Configuration, SmartContractsApi, SmartContractsApiInterface } from "@stacks/blockchain-api-client"
-// import toml from "toml";
 import { getAPI } from "../chains/api"
-import { loadFile } from "../server/default"
-import * as toml from '@ltd/j-toml'
 import { parseContractId } from "@stacks/transactions"
 
 export interface EthGetSourceCodeInterface {

@@ -1,6 +1,6 @@
 import { ISmartContract, InvokeParam } from "./interfaces"
 import { getAPI } from "../chains/api"
-import { request } from "@stacks/connect"
+import { FinishedTxData, openContractCall, request } from "@stacks/connect"
 import { Cl, ClarityAbiFunction, ClarityType, ClarityValue, cvToHex, hexToCV, parseContractId } from "@stacks/transactions"
 import { STACKS_MAINNET, STACKS_TESTNET, StacksNetwork } from "@stacks/network";
 import { ChainID } from "../chains";
@@ -9,6 +9,8 @@ import {
   SmartContractsApiInterface,
   SmartContractsApi,
   ReadOnlyFunctionSuccessResponse,
+  TransactionsApi,
+  TransactionsApiInterface,
 } from '@stacks/blockchain-api-client';
 
 interface ReadOnlyOptions {
@@ -72,25 +74,11 @@ export class StacksSmartContract implements ISmartContract {
     // Docs: https://github.com/hirosystems/stacks-blockchain-api/blob/9ce9a3311a5ad80028a83eeb89aba27d65d0f8df/content/feature-guides/use-clarity-values.md
     const apiConfig: Configuration = new Configuration({
       fetchApi: fetch,
-      basePath: 'https://api.testnet.hiro.so',
+      basePath: getAPI(this.chainId),
     });
 
     const contractsApi: SmartContractsApiInterface = new SmartContractsApi(apiConfig);
 
-    // use most recent from: https://api.<mainnet/testnet>.hiro.so/v2/pox
-    const rewardCycle = Cl.uint(22);
-
-    console.log(contractsApi)
-    console.log({
-      contractAddress: principal,
-      contractName: name,
-      functionName: method,
-      readOnlyFunctionArgs: {
-        sender: principal,
-        arguments: args.map((x: ClarityValue) => cvToHex(x)),
-      },
-    })
-    // call a read-only function
     const fnCall: ReadOnlyFunctionSuccessResponse = await contractsApi.callReadOnlyFunction({
       contractAddress: principal,
       contractName: name,
@@ -101,34 +89,7 @@ export class StacksSmartContract implements ISmartContract {
       },
     });
 
-    console.log({
-      status: fnCall.okay,
-      result: fnCall.result,
-      representation: hexToCV(fnCall.result || "").type.toString(),
-    });
-    // // const args = functionArgs.map(arg => cvToHex(arg));
-
-    // // const body = JSON.stringify({
-    // //   sender: senderAddress,
-    // //   arguments: args,
-    // // });
-    // const body = JSON.stringify({
-    //   "sender": "ST343Q482FS7E64MMQFVZ3XDDY8Y89KYWSXBXQNG9",
-    //   "arguments": [
-    //     "0x051ac83b91027e4ee31294bbf7f1f5adf23c84cfdccf"
-    //   ]
-    // });
-
-    // const opts: any = {
-    //   method: "POST",
-    //   headers: headers(),
-    //   body,
-    //   redirect: "follow"
-    // };
-
-    // const response = await fetch(`${url}/call-read/${address}/${name}/${encodeURIComponent(method)}`, opts);
-
-    // return response.json();
+    return fnCall
   }
 
   /**
@@ -146,14 +107,64 @@ export class StacksSmartContract implements ISmartContract {
       functionArgs: args,
       network: 'testnet',
     })
-    const response = await request('stx_callContract', {
-      contract: this.contractAddress,
-      functionName: method,
-      functionArgs: args,
-      network: 'testnet',
-    });
+    // const response = await request('stx_callContract', {
+    //   contract: this.contractAddress,
+    //   functionName: method,
+    //   functionArgs: args,
+    //   network: 'testnet',
+    // });
+    // console.log(response)
 
-    console.log(response)
+    const [contractAddress, contractName] = parseContractId(this.contractAddress)
+
+    console.log({
+      contractAddress,
+      contractName,
+      functionName: encodeURIComponent(method),
+      functionArgs: args,
+      network: this.network,
+      // authOrigin: CONNECT_AUTH_ORIGIN,
+      onFinish: (data: FinishedTxData) => {
+        console.log(data)
+      },
+      // postConditions:
+      //   values.postConditionMode === PostConditionMode.Allow
+      //     ? undefined
+      //     : getPostCondition({
+      //       postConditionType,
+      //       postConditionAddress,
+      //       postConditionConditionCode,
+      //       postConditionAmount,
+      //       postConditionAssetAddress,
+      //       postConditionAssetContractName,
+      //       postConditionAssetName,
+      //     }),
+      // postConditionMode,
+    })
+    openContractCall({
+      contractAddress,
+      contractName,
+      functionName: encodeURIComponent(method),
+      functionArgs: args,
+      network: this.network,
+      // authOrigin: CONNECT_AUTH_ORIGIN,
+      onFinish: (data: FinishedTxData) => {
+        console.log(data)
+      },
+      // postConditions:
+      //   values.postConditionMode === PostConditionMode.Allow
+      //     ? undefined
+      //     : getPostCondition({
+      //       postConditionType,
+      //       postConditionAddress,
+      //       postConditionConditionCode,
+      //       postConditionAmount,
+      //       postConditionAssetAddress,
+      //       postConditionAssetContractName,
+      //       postConditionAssetName,
+      //     }),
+      // postConditionMode,
+    });
   }
 }
 

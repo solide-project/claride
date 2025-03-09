@@ -13,15 +13,17 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { toNative } from "@/lib/stacks/parser"
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Key } from "lucide-react";
 import { getTransactionExplorer } from "@/lib/chains/explorer";
 import { useFileSystem } from "@/components/core/providers/file-provider";
 import { ConnectWallet } from "../connect";
 import { isConnected } from "@stacks/connect";
 import { AbiParameter } from "@/lib/stacks/abi";
-import { ClarityAbiFunction } from "@stacks/transactions";
-
-const CONSTRUCTOR_METHOD = "constructor"
+import { ClarityAbiFunction, hexToCV, ReadOnlyFunctionResponse, ReadOnlyFunctionSuccessResponse } from "@stacks/transactions";
+import * as toml from '@ltd/j-toml'
+import { CompiledContract, useClarinet } from "../clarinet-provider";
+import { SelectContract } from "./select-contract";
+import { Configuration, TransactionsApi, TransactionsApiInterface } from "@stacks/blockchain-api-client";
 
 interface ContractInvokeProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -29,6 +31,7 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
     const web3Hook = useWeb3Hook();
     const logger = useLogger();
     const vfs = useFileSystem();
+    const clarinet = useClarinet()
 
     const [msgValue, setMsgValue] = useState<number>(0)
     const [contractAddress, setContractAddress] = useState<string>("")
@@ -44,7 +47,7 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
             setIsDeploying(true)
             await doDeploy();
         } catch (e: any) {
-            logger.error(e.message || "Error deploying contract")
+            logger.error(e.message || "Error deploying contract. Make sure you deploy on the right chain. Change chain in settings")
             console.error(e)
         } finally {
             setIsDeploying(false)
@@ -56,17 +59,21 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
             throw new Error("Not authenticated")
         }
 
+        if (!clarinet.selectedContract && !contractAddress) {
+            throw new Error("Please select contract to deploy")
+        }
+
         logger.info("Deploying contract...")
 
         // This is to determined if we are deploying an existing contract
         let contractName = ""
         let codeBody = ""
         if (!contractAddress) {
-            contractName = "counter";
-            codeBody = vfs.vfs.cat("contracts/nft-marketplace.clar")?.content || "";
+            contractName = clarinet.selectedContract?.filePath || ""
+            codeBody = clarinet.selectedContract?.content || ""
         }
 
-        const result = await web3Hook.doDeploy({ contractAddress, contractName: "counter", codeBody })
+        const result = await web3Hook.doDeploy({ contractAddress, contractName, codeBody })
         if (result.contract) {
             setContractAddress(result.contract)
             logger.success(`Contract deployed at ${result.contract}`)
@@ -144,7 +151,6 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
         try {
             initialiseInvocation(method)
 
-            // This should be the transaction hash
             console.log(msgValue)
             const result = await web3Hook.executeSend(
                 selectedContractAddress,
@@ -152,21 +158,8 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
                 formatParameters(selectedAbiParameter!),
                 msgValue
             )
-            const tx = result.toString()
 
-            // formatOutput(selectedAbiParameter, result)
-            const hex = await window.ethereum.request({ method: "eth_chainId" })
-            const chainId = parseInt(hex, 16).toString()
-            const txExplorer = getTransactionExplorer(chainId, tx)
-            if (txExplorer) {
-                logger.success(
-                    <a className="underline" href={txExplorer} target="_blank">
-                        {tx}
-                    </a>
-                )
-            } else {
-                logger.success(tx)
-            }
+            console.log(result)
         } catch (error: any) {
             logger.error(handleError(error), true)
         } finally {
@@ -180,13 +173,18 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
             initialiseInvocation(method)
 
             // This should be the transaction hash
-            const result = await web3Hook.executeCall(
+            const result: ReadOnlyFunctionResponse = await web3Hook.executeCall(
                 selectedContractAddress,
                 method,
                 formatParameters(selectedAbiParameter!)
             )
 
-            // formatOutput(selectedAbiParameter!, result)
+            if (!result.okay) {
+                throw new Error(result.cause)
+            }
+
+            console.log(result, hexToCV(result.result || ""))
+            formatOutput(method, result)
         } catch (error: any) {
             logger.error(handleError(error), true)
         } finally {
@@ -195,29 +193,18 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
         }
     }
 
-    const formatOutput = (entry: ClarityAbiFunction, result: any) => {
-        console.log("formatOutput", entry, result)
-        // if (entry.outputs && entry.outputs.length > 0) {
-        //     if (typeof result === "object") {
-        //         result = JSON.stringify(result, (_, v) =>
-        //             typeof v === "bigint" ? v.toString() : v
-        //         )
-        //     } else if (entry.outputs[0].type.includes("int")) {
-        //         result = result.toString() as BigInt
-        //     } else {
-        //         result = result as string
-        //     }
+    const formatOutput = (method: string, result: ReadOnlyFunctionSuccessResponse) => {
+        const value = hexToCV(result.result)
+        console.log("formatOutput", value)
 
-        //     logger.info(
-        //         <div className="flex items-center gap-2">
-        //             <ArrowLeft size={18} /> <div>{result}</div>
-        //         </div>
-        //     )
-        //     setRet({ ...ret, [entry.name]: result })
-        // } else {
-        //     logger.success(result)
-        //     setRet({ ...ret, [entry.name]: result })
-        // }
+        const display = JSON.stringify(value, (_, v) => typeof v === 'bigint' ? v.toString() : v)
+
+        logger.info(
+            <div className="flex items-center gap-2">
+                <ArrowLeft size={18} /> <div>{display}</div>
+            </div>
+        )
+        setRet({ ...ret, [method]: result })
     }
     //#endregion
 
@@ -238,10 +225,15 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
     const handleRemoveContract = (contractAddress: string) => {
         web3Hook.removeContract(contractAddress)
     }
-    return <div>
-        <ConnectWallet />
 
-        <div className="flex">
+    return <div>
+        <div>
+            <SelectContract />
+        </div>
+        <div className="flex items-center justify-center my-2">
+            <ConnectWallet />
+        </div>
+        <div className="flex gap-4">
             <Button
                 size="sm"
                 onClick={handleDeploy}

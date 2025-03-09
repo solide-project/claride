@@ -5,9 +5,11 @@ import { FinishedTxData, request } from "@stacks/connect"
 import { STACKS_TESTNET } from '@stacks/network';
 import { StacksSmartContract } from "@/lib/stacks/contract"
 import { ChainID } from "@/lib/chains"
+import { useClarinet } from "../clarinet-provider";
 
 export const useWeb3Hook = () => {
     const [contracts, setContracts] = useState<DeployedContracts>({})
+    const { selectedNetwork } = useClarinet()
 
     const executeSend = async (
         contractAddress: string,
@@ -55,7 +57,7 @@ export const useWeb3Hook = () => {
         codeBody: string
     }) => {
         if (contractAddress) {
-            const contract = new StacksSmartContract(contractAddress, ChainID.STACKS_TESTNET)
+            const contract = new StacksSmartContract(contractAddress, selectedNetwork.chainId.toString())
             await contract.init()
             setContracts({
                 ...contracts,
