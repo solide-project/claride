@@ -11,7 +11,7 @@ import path from "path"
 export const getClarityContract = async (url: string) => {
     try {
         const loader = new ClarityLoader(url)
-        return await loader.generateSource()
+        return await loader.generateSourceClarity()
     } catch (e: any) {
         return e.message.toString()
     }
@@ -19,10 +19,59 @@ export const getClarityContract = async (url: string) => {
 
 class ClarityLoader {
     source: string
+    defaultTomlPath: string = "Clarinet.toml"
     constructor(source: string) {
         this.source = source
     }
 
+    async generateSourceClarity(): Promise<any | string> {
+        if (!this.source.endsWith(".clar")) {
+            return "Invalid Clarity contract"
+        }
+
+        let sources: any = {}
+        const parts = parseGitHubUrl(this.source)
+        const fileName = path.basename(parts.path)
+        const contractSource = await fetchGithubSource(this.source)
+        const contractPath = `contracts/${fileName}`
+        sources[contractPath] = { content: contractSource }
+
+        const { name } = path.parse(parts.path)
+        const tomlContent =
+            `
+[project]
+name = '${name}'
+description = ''
+authors = []
+telemetry = false
+cache_dir = './.cache'
+requirements = []
+
+[contracts.${name}]
+path = '${contractPath}'
+clarity_version = 3
+epoch = 3.1
+
+[repl.analysis]
+passes = ['check_checker']
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
+                    `.trim()
+        sources[this.defaultTomlPath] = { content: tomlContent || "" }
+
+        return {
+            language: "Clarity",
+            settings: {
+            },
+            sources: {
+                ...sources,
+            },
+        }
+    }
     async generateSource(): Promise<any | string> {
         const parts = parseGitHubUrl(this.source)
         const url = `https://api.github.com/repos/${parts.entity}/${parts.repo}/contents/${parts.path}`
@@ -49,21 +98,10 @@ class ClarityLoader {
             }
         }
 
-        let dependencies: ContractDependency[] = []
         let sources: any = {}
-        // try {
-        //     dependencies = await loadSources(sourcesFolder?.url)
-        //     dependencies.forEach((dependency) => {
-        //         const { paths, originalContents } = dependency
-        //         const sourceKey = paths.isHttp() ? paths.folderPath : paths.filePath
-        //         sources[sourceKey] = { content: originalContents || "" }
-        //     })
-        // } catch (error: any) {
-        //     return "Error loading dependencies"
-        // }
 
         return {
-            language: "Clarinet",
+            language: "Clarity",
             settings: {
                 compilationTarget: {
                     [tomlFile.path]: "Clarinet.toml"

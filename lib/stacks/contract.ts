@@ -100,85 +100,91 @@ export class StacksSmartContract implements ISmartContract {
     args,
     value = "0",
     // gas = "1000000",
+    userAddress
   }: InvokeParam): Promise<any> {
-    console.log({
-      contract: this.contractAddress,
-      functionName: method,
-      functionArgs: args,
-      network: 'testnet',
-    })
-    // const response = await request('stx_callContract', {
-    //   contract: this.contractAddress,
-    //   functionName: method,
-    //   functionArgs: args,
-    //   network: 'testnet',
-    // });
+
+    try {
+      const response = await request('stx_callContract', {
+        contract: this.contractAddress,
+        functionName: method,
+        functionArgs: args,
+        network: 'testnet',
+      });
+
+      return response.txid
+    } catch (err: any) {
+      console.log("Manual Getting Transaction Info ...")
+      const apiConfig: Configuration = new Configuration({
+        fetchApi: fetch,
+        basePath: getAPI(this.chainId),
+      });
+
+      const transactionsApi: TransactionsApiInterface = new TransactionsApi(apiConfig);
+      const txs = await transactionsApi.getAddressMempoolTransactions({
+        address: userAddress!
+      })
+      const tx = await foundPendingContractCallTx(
+        transactionsApi,
+        userAddress!,
+        this.contractAddress,
+        method
+      )
+
+      return tx.tx_id
+    }
+
     // console.log(response)
 
-    const [contractAddress, contractName] = parseContractId(this.contractAddress)
-
-    console.log({
-      contractAddress,
-      contractName,
-      functionName: encodeURIComponent(method),
-      functionArgs: args,
-      network: this.network,
-      // authOrigin: CONNECT_AUTH_ORIGIN,
-      onFinish: (data: FinishedTxData) => {
-        console.log(data)
-      },
-      // postConditions:
-      //   values.postConditionMode === PostConditionMode.Allow
-      //     ? undefined
-      //     : getPostCondition({
-      //       postConditionType,
-      //       postConditionAddress,
-      //       postConditionConditionCode,
-      //       postConditionAmount,
-      //       postConditionAssetAddress,
-      //       postConditionAssetContractName,
-      //       postConditionAssetName,
-      //     }),
-      // postConditionMode,
-    })
-    openContractCall({
-      contractAddress,
-      contractName,
-      functionName: encodeURIComponent(method),
-      functionArgs: args,
-      network: this.network,
-      // authOrigin: CONNECT_AUTH_ORIGIN,
-      onFinish: (data: FinishedTxData) => {
-        console.log(data)
-      },
-      // postConditions:
-      //   values.postConditionMode === PostConditionMode.Allow
-      //     ? undefined
-      //     : getPostCondition({
-      //       postConditionType,
-      //       postConditionAddress,
-      //       postConditionConditionCode,
-      //       postConditionAmount,
-      //       postConditionAssetAddress,
-      //       postConditionAssetContractName,
-      //       postConditionAssetName,
-      //     }),
-      // postConditionMode,
-    });
+    // const [contractAddress, contractName] = parseContractId(this.contractAddress)
+    // openContractCall({
+    //   contractAddress,
+    //   contractName,
+    //   functionName: encodeURIComponent(method),
+    //   functionArgs: args,
+    //   network: this.network,
+    //   // authOrigin: CONNECT_AUTH_ORIGIN,
+    //   onFinish: (data: FinishedTxData) => {
+    //     console.log(data)
+    //   },
+    //   // postConditions:
+    //   //   values.postConditionMode === PostConditionMode.Allow
+    //   //     ? undefined
+    //   //     : getPostCondition({
+    //   //       postConditionType,
+    //   //       postConditionAddress,
+    //   //       postConditionConditionCode,
+    //   //       postConditionAmount,
+    //   //       postConditionAssetAddress,
+    //   //       postConditionAssetContractName,
+    //   //       postConditionAssetName,
+    //   //     }),
+    //   // postConditionMode,
+    // });
   }
 }
 
 
-const headers = () => {
-  const headers = new Headers();
-  headers.append("accept", "*/*");
-  headers.append("accept-language", "en-US,en;q=0.5");
-  headers.append("cache-control", "no-cache");
-  headers.append("content-type", "application/json");
-  // headers.append("origin", "https://explorer.hiro.so");
-  headers.append("pragma", "no-cache");
-  headers.append("priority", "u=1, i");
-  // headers.append("referer", "https://explorer.hiro.so/");
-  headers.append("x-api-key", "e03338a5c9db1483abdddf1bcaaee55b");
-  return headers
+const foundPendingContractDeployTx = async (transactionsApi: TransactionsApiInterface, userAddress: string, contractId: string) => {
+  const txs = await transactionsApi.getAddressMempoolTransactions({
+    address: userAddress
+  })
+  const tx: any = txs.results.filter((tx: any) => tx.tx_type === "smart_contract"
+    && tx.smart_contract.contract_id === contractId).pop()
+
+  return tx;
+}
+
+const foundPendingContractCallTx = async (transactionsApi: TransactionsApiInterface, userAddress: string, contractId: string, functionName: string) => {
+  const txs = await transactionsApi.getAddressMempoolTransactions({
+    address: userAddress
+  })
+  const tx: any = txs.results.filter((tx: any) => tx.tx_type === "contract_call"
+    && tx.contract_call.contract_id === contractId
+    && tx.contract_call.function_name === functionName).pop()
+
+  return tx;
+}
+
+const delay = (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

@@ -1,23 +1,24 @@
 import { ChainID } from "./chain-id"
 
 const data: { [key: string]: string } = {
-    [ChainID.STACKS_TESTNET]: "https://arbiscan.io",
-    [ChainID.STACKS]: "https://goerli.arbiscan.io",
+    [ChainID.STACKS_TESTNET]: "?chain=testnet",
+    [ChainID.STACKS]: "?chain=mainnet",
 }
+const explorerUrl = "https://explorer.hiro.so"
 
 export const getExplorer = (network: string): string => data[network] || ""
 
-export const getContractExplorer = (network: string, contract: string): string => {
+export const getAddressExplorer = (network: string, contract: string): string => {
     const explorer = getExplorer(network)
     let addressPath = ""
 
     switch (network) {
         default:
-            addressPath = `address/${contract}`
+            addressPath = `address/${contract}${explorer}`
             break
     }
 
-    return `${explorer}/${addressPath}`
+    return `${explorerUrl}/${addressPath}`
 }
 
 export const getTransactionExplorer = (network: string, tx: string): string => {

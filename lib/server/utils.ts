@@ -43,6 +43,7 @@ export const fetchGithubSource = async (url: string) => {
         headers: myHeaders,
     }
 
+    console.log(url)
     const response = await fetch(url, requestOptions)
     if (!response.ok) return ""
 

@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/dialog"
 import { toNative } from "@/lib/stacks/parser"
 import { ArrowLeft, ArrowRight, Key } from "lucide-react";
-import { getTransactionExplorer } from "@/lib/chains/explorer";
+import { getAddressExplorer, getExplorer, getTransactionExplorer } from "@/lib/chains/explorer";
 import { useFileSystem } from "@/components/core/providers/file-provider";
 import { ConnectWallet } from "../connect";
-import { isConnected } from "@stacks/connect";
+import { connect, getLocalStorage, isConnected } from "@stacks/connect";
 import { AbiParameter } from "@/lib/stacks/abi";
 import { ClarityAbiFunction, hexToCV, ReadOnlyFunctionResponse, ReadOnlyFunctionSuccessResponse } from "@stacks/transactions";
 import * as toml from '@ltd/j-toml'
@@ -64,6 +64,8 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
         }
 
         logger.info("Deploying contract...")
+        const userData = getLocalStorage()
+        const userAddress = userData?.addresses.stx.pop()?.address || ""
 
         // This is to determined if we are deploying an existing contract
         let contractName = ""
@@ -73,17 +75,21 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
             codeBody = clarity.selectedContract?.content || ""
         }
 
-        const result = await web3Hook.doDeploy({ contractAddress, contractName, codeBody })
+        const result = await web3Hook.doDeploy({ contractAddress, contractName, codeBody, userAddress })
         if (result.contract) {
             setContractAddress(result.contract)
             logger.success(`Contract deployed at ${result.contract}`)
+            if (result.transactionHash)
+                logger.success(`Tx ID ${result.transactionHash}`)
 
             setContractArguments({
                 ...contractArguments,
                 [result.contract]: {},
             })
         } else {
-            logger.error(`Error deploying contract: ${result.transactionHash}`)
+            // logger.error(`Error deploying contract: ${result.transactionHash}`)
+            const explorer = getAddressExplorer(clarity.selectedNetwork.chainId.toString(), userAddress)
+            logger.error(`Error deploying contract: ${explorer}`)
         }
     }
     //#endregion
@@ -151,15 +157,18 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
         try {
             initialiseInvocation(method)
 
-            console.log(msgValue)
+            const userData = getLocalStorage()
+            const userAddress = userData?.addresses.stx.pop()?.address || ""
+
             const result = await web3Hook.executeSend(
                 selectedContractAddress,
                 method,
                 formatParameters(selectedAbiParameter!),
-                msgValue
+                msgValue,
+                userAddress
             )
 
-            console.log(result)
+            logger.info(`Tx ID ${result}`)
         } catch (error: any) {
             logger.error(handleError(error), true)
         } finally {

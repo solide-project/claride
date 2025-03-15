@@ -1,5 +1,5 @@
 export interface CompileInput {
-    language: "Clarinet"
+    language: "Clarity"
     settings?: {
         outputSelection: any
         optimizer: any
