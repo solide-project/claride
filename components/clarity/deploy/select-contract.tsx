@@ -43,8 +43,8 @@ export function SelectContract({ className }: SelectContractProps) {
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
                 <Command>
-                    <CommandInput placeholder="Search framework..." />
-                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandInput placeholder="Search contract..." />
+                    <CommandEmpty>No contract found.</CommandEmpty>
                     <CommandGroup>
                         <CommandList>
                             {compiledContracts.map((contract, index) => {

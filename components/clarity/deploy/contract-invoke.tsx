@@ -80,7 +80,7 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
             setContractAddress(result.contract)
             logger.success(`Contract deployed at ${result.contract}`)
             if (result.transactionHash) {
-                const txExplorer = getTransactionExplorer(clarity.selectedNetwork.chainId.toString(), userAddress)
+                const txExplorer = getTransactionExplorer(clarity.selectedNetwork.chainId.toString(), result.transactionHash)
                 logger.success(
                     <a className="underline" href={txExplorer} target="_blank">
                         {result.transactionHash}
@@ -181,7 +181,14 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
                 userAddress
             )
 
-            logger.info(`Tx ID ${result}`)
+            if (result) {
+                const txExplorer = getTransactionExplorer(clarity.selectedNetwork.chainId.toString(), result)
+                logger.success(
+                    <a className="underline" href={txExplorer} target="_blank">
+                        {result}
+                    </a>
+                )
+            }
         } catch (error: any) {
             logger.error(handleError(error), true)
         } finally {
@@ -291,24 +298,28 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
                     name={key}
                     onClosed={() => handleRemoveContract(key)}
                 >
-                    <div className="flex flex-wrap gap-2">
-                        {(val.abi.functions as ClarityAbiFunction[])
-                            // .filter((abi) => abi.type === "function")
-                            .map((abi: ClarityAbiFunction, methodsIndex: number) => {
-                                return (
-                                    <Button
-                                        key={methodsIndex}
-                                        onClick={() => {
-                                            setSelectedContractAddress(key)
-                                            setSelectedAbiParameter(abi)
-                                        }}
-                                        size="sm"
-                                    >
-                                        {abi.name}
-                                    </Button>
-                                )
-                            })}
-                    </div>
+
+                    {val?.abi?.functions
+                        ? <div className="flex flex-wrap gap-2">
+                            {((val?.abi?.functions || []) as ClarityAbiFunction[])
+                                // .filter((abi) => abi.type === "function")
+                                .map((abi: ClarityAbiFunction, methodsIndex: number) => {
+                                    return (
+                                        <Button
+                                            key={methodsIndex}
+                                            onClick={() => {
+                                                setSelectedContractAddress(key)
+                                                setSelectedAbiParameter(abi)
+                                            }}
+                                            size="sm"
+                                        >
+                                            {abi.name}
+                                        </Button>
+                                    )
+                                })}
+                        </div>
+                        : <div>Note no function was found for this contract</div>
+                    }
                 </CollapsibleChevron>
             )
         })}
