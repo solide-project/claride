@@ -79,8 +79,14 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
         if (result.contract) {
             setContractAddress(result.contract)
             logger.success(`Contract deployed at ${result.contract}`)
-            if (result.transactionHash)
-                logger.success(`Tx ID ${result.transactionHash}`)
+            if (result.transactionHash) {
+                const txExplorer = getTransactionExplorer(clarity.selectedNetwork.chainId.toString(), userAddress)
+                logger.success(
+                    <a className="underline" href={txExplorer} target="_blank">
+                        {result.transactionHash}
+                    </a>
+                )
+            }
 
             setContractArguments({
                 ...contractArguments,
@@ -89,7 +95,14 @@ export function ContractInvoke({ className }: ContractInvokeProps) {
         } else {
             // logger.error(`Error deploying contract: ${result.transactionHash}`)
             const explorer = getAddressExplorer(clarity.selectedNetwork.chainId.toString(), userAddress)
-            logger.error(`Error deploying contract: ${explorer}`)
+            logger.error(
+                <>
+                    <div>Error with Deployment. Check if it shows up</div>
+                    < a className="underline" href={explorer} target="_blank" >
+                        {userAddress}
+                    </a >
+                </>
+            )
         }
     }
     //#endregion

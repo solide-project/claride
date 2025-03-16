@@ -23,17 +23,13 @@ export const getAddressExplorer = (network: string, contract: string): string =>
 
 export const getTransactionExplorer = (network: string, tx: string): string => {
     const explorer = getExplorer(network)
-    if (!explorer) {
-        return ""
-    }
-
-    let path = ""
+    let addressPath = ""
 
     switch (network) {
         default:
-            path = `tx/${tx}`
+            addressPath = `txid/${tx}${explorer}`
             break
     }
 
-    return `${explorer}/${path}`
+    return `${explorerUrl}/${addressPath}`
 }
